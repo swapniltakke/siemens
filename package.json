@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@siemens/ix": "^2.4.1",
+    "@siemens/ix-angular": "^2.4.1",
+    "@siemens/ix-icons": "^2.2.0",
+    "ag-grid-community": "^32.0.2",
+    "ag-grid-enterprise": "^32.0.2"
+  }
+}
