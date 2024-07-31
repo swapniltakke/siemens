@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Users</title>
+    <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-grid.css">
+    <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css">
+    <script src="https://unpkg.com/ag-grid-community@31.0.0/dist/ag-grid-community.noStyle.js"></script>
+    <style>
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .ag-theme-alpine { height: 600px; width: 100%; }
+        .button { margin: 0 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>List Users</h1>
+        <div id="myGrid" class="ag-theme-alpine"></div>
+    </div>
+    <script>
+        // Define column definitions with editable fields and action buttons
+        const columnDefs = [
+            { headerName: 'ID', field: 'id', hide: true },
+            { headerName: 'Email', field: 'email', editable: true },
+            { headerName: 'Full Name', field: 'fullname', editable: true },
+            { headerName: 'Country', field: 'country', editable: true },
+            {
+                headerName: 'Actions',
+                cellRenderer: (params) => {
+                    return `
+                        <button class="button" onclick="editUser(${params.data.id})">Edit</button>
+                        <button class="button" onclick="deleteUser(${params.data.id})">Delete</button>
+                    `;
+                },
+                sortable: false,
+                filter: false,
+                width: 150
+            }
+        ];
+
+        // Define grid options
+        const gridOptions = {
+            columnDefs: columnDefs,
+            defaultColDef: {
+                sortable: true,
+                filter: true
+            },
+            onGridReady: (params) => {
+                fetch('list_users.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        params.api.setRowData(data);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+
+                // Store grid API for later use
+                window.gridApi = params.api;
+            },
+            onCellValueChanged: (params) => {
+                // Optionally handle changes to cell values here
+                console.log('Cell value changed', params);
+            }
+        };
+
+        // Initialize the grid
+        document.addEventListener('DOMContentLoaded', function() {
+            const eGridDiv = document.querySelector('#myGrid');
+            agGrid.createGrid(eGridDiv, gridOptions);
+        });
+
+        // Save User Changes
+        function editUser(userId) {
+            const rowNode = window.gridApi.getRowNode(userId);
+            const data = rowNode.data;
+
+            fetch('edit_user.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    id: data.id,
+                    email: data.email,
+                    fullname: data.fullname,
+                    country: data.country
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.message) {
+                    alert('User updated successfully');
+                } else {
+                    alert('Failed to update user.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Delete User
+        function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                fetch('delete_user.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        id: userId
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.message) {
+                        window.gridApi.setRowData(result.data);
+                        alert('User deleted successfully');
+                    } else {
+                        alert('Failed to delete user.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
