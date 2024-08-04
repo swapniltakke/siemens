@@ -19,7 +19,6 @@
         <div id="myGrid" class="ag-theme-alpine"></div>
     </div>
     <script>
-        // Define column definitions with editable fields and action buttons
         const columnDefs = [
             { headerName: 'ID', field: 'id', hide: true },
             { headerName: 'Email', field: 'email', editable: true },
@@ -39,7 +38,6 @@
             }
         ];
 
-        // Define grid options
         const gridOptions = {
             columnDefs: columnDefs,
             defaultColDef: {
@@ -56,22 +54,18 @@
                         console.error('Error:', error);
                     });
 
-                // Store grid API for later use
                 window.gridApi = params.api;
             },
             onCellValueChanged: (params) => {
-                // Optionally handle changes to cell values here
                 console.log('Cell value changed', params);
             }
         };
 
-        // Initialize the grid
         document.addEventListener('DOMContentLoaded', function() {
             const eGridDiv = document.querySelector('#myGrid');
             agGrid.createGrid(eGridDiv, gridOptions);
         });
 
-        // Save User Changes
         function editUser(userId) {
             const rowNode = window.gridApi.getRowNode(userId);
             const data = rowNode.data;
@@ -101,7 +95,6 @@
             });
         }
 
-        // Delete User
         function deleteUser(userId) {
             if (confirm('Are you sure you want to delete this user?')) {
                 fetch('delete_user.php', {

@@ -59,7 +59,8 @@
             })
             .then(response => response.json())
             .then(result => {
-                document.getElementById('message').innerText = result.success ? 'User created successfully!' : `Error: ${result.error}`;
+                alert('User created successfully');
+                window.location.reload();
             })
             .catch(error => {
                 document.getElementById('message').innerText = `Error: ${error.message}`;
