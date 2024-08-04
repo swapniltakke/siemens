@@ -10,11 +10,8 @@
         <h1>Welcome to My Website</h1>
     </header>
     <main>
-        <!-- Include the list_users.html file -->
-        <?php include 'list_users.html'; ?>
-        
-        <!-- Include the create_user.html file -->
         <?php include 'create_user.html'; ?>
+        <?php include 'list_users.html'; ?>
     </main>
     <footer>
         <p>&copy; 2024 My Website</p>
