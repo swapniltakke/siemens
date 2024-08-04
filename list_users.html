@@ -110,6 +110,7 @@
                     if (result.message) {
                         window.gridApi.setRowData(result.data);
                         alert('User deleted successfully');
+                        window.location.reload();
                     } else {
                         alert('Failed to delete user.');
                     }
