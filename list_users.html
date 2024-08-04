@@ -28,13 +28,12 @@
                 headerName: 'Actions',
                 cellRenderer: (params) => {
                     return `
-                        <button class="button" onclick="editUser(${params.data.id})">Edit</button>
                         <button class="button" onclick="deleteUser(${params.data.id})">Delete</button>
                     `;
                 },
                 sortable: false,
                 filter: false,
-                width: 150
+                width: 250
             }
         ];
 
