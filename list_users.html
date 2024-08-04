@@ -11,6 +11,7 @@
         .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
         .ag-theme-alpine { height: 600px; width: 100%; }
         .button { margin: 0 5px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -27,7 +28,11 @@
             {
                 headerName: 'Actions',
                 cellRenderer: (params) => {
+                    const isEditing = params.node.data.isEditing;
                     return `
+                        <button class="button" onclick="toggleEdit(${params.data.id})">
+                            ${isEditing ? 'Save' : 'Edit'}
+                        </button>
                         <button class="button" onclick="deleteUser(${params.data.id})">Delete</button>
                     `;
                 },
@@ -41,8 +46,10 @@
             columnDefs: columnDefs,
             defaultColDef: {
                 sortable: true,
-                filter: true
+                filter: true,
+                editable: true
             },
+            getRowId: params => params.data.id,
             onGridReady: (params) => {
                 fetch('list_users.php')
                     .then(response => response.json())
@@ -62,36 +69,53 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             const eGridDiv = document.querySelector('#myGrid');
-            agGrid.createGrid(eGridDiv, gridOptions);
+            new agGrid.Grid(eGridDiv, gridOptions);
         });
 
-        function editUser(userId) {
-            const rowNode = window.gridApi.getRowNode(userId);
-            const data = rowNode.data;
+        function toggleEdit(userId) {
+            const rowNode = window.gridApi.getRowNode(userId.toString());
+            if (!rowNode) {
+                alert('User not found.');
+                return;
+            }
 
-            fetch('edit_user.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    id: data.id,
-                    email: data.email,
-                    fullname: data.fullname,
-                    country: data.country
+            const isEditing = rowNode.data.isEditing;
+
+            if (isEditing) {
+                const data = rowNode.data;
+                fetch('edit_user.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        id: data.id,
+                        email: data.email,
+                        fullname: data.fullname,
+                        country: data.country
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.message) {
-                    alert('User updated successfully');
-                } else {
-                    alert('Failed to update user.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+                .then(response => response.json())
+                .then(result => {
+                    if (result.message) {
+                        alert('User updated successfully');
+                        data.isEditing = false;
+                        window.gridApi.refreshCells({ rowNodes: [rowNode], force: true });
+                    } else {
+                        alert('Failed to update user.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            } else {
+                rowNode.data.isEditing = true;
+                window.gridApi.refreshCells({ rowNodes: [rowNode], force: true });
+                window.gridApi.startEditingCell({
+                    rowIndex: rowNode.rowIndex,
+                    colKey: 'email'
+                });
+            }
         }
 
         function deleteUser(userId) {
